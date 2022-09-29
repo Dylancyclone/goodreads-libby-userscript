@@ -22,7 +22,7 @@ Go to the libby web app's main menu (https://libbyapp.com/interview/menu) and cl
 
 ![The Save Libraries button](./libby.png)
 
-Then, search for a book on Goodreads. When you've found a book, the userscript will search across all your libby libraries and show the results on the left side of the screen.
+Then, search for a book on Goodreads. When you've found a book, the userscript will search across all your libby libraries and show the results under the book's description.
 
 ![The search results on Goodreads](./goodreads.png)
 
