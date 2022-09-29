@@ -11,7 +11,7 @@
 // @grant					GM.getValue
 // @license				MIT
 // ==/UserScript==
-
+window.addEventListener('load', function() {
 (function () {
   "use strict";
 
@@ -41,37 +41,26 @@
     return libbySyncButton;
   };
 
-  /**
-   * Add the button
-   * Might outrun the rest of the dom,
-   * so keep retrying until the container is ready
-   */
-  const addLibbyButton = () => {
-    let container = document.getElementsByClassName("menu-library-buttons");
-    if (container && container[0]) {
-      container[0].parentNode.insertBefore(
-        createLibbyButton(),
-        container[0].nextSibling
-      );
-    } else {
-      setTimeout(addLibbyButton, 10);
-    }
-  };
+  const createGoodreadsResults = async () => {
+    let builderDiv = document.createElement("div");
 
-  const addGoodreadsResults = async () => {
-    let bookTitle = document.getElementById("bookTitle").innerHTML.trim();
-    let bookAuthor = document
-      .getElementsByClassName("authorName")[0]
-      .firstChild.innerHTML.trim();
+    let bookTitle = document.querySelector("[data-testid='bookTitle']").innerHTML.trim();
+    let bookAuthor = document.querySelector("[data-testid='name']").innerHTML.trim();
     let searchString = encodeURIComponent(`${bookTitle} ${bookAuthor}`);
     let libraries = JSON.parse(await GM.getValue("libraries", "[]"));
-    document.body.innerHTML += `<div style="position: fixed;
-						top: 100px;
-						left: 1em;
-						width: 400px;
-						background-color: #ececec;
-						border: 1px solid black;
-						padding: 1em;"><h3>Libby results</h3><div id="libby-results"></div></div>`;
+    builderDiv.innerHTML = `
+      <div style="
+        background-color: #ececec;
+        border: 1px solid black;
+        margin-top: 25px;
+        padding: 1em;"
+      >
+        <h3>Libby results</h3>
+        <div id="libby-results"></div>
+      </div>
+    `.trim();
+
+    let goodreadsResults = builderDiv.firstChild;
 
     if (libraries.length === 0) {
       document.getElementById(
@@ -90,6 +79,39 @@
           ).innerHTML += `<div>${library._.name} <b><a href="https://libbyapp.com/search/${library.baseKey}/search/query-${searchString}/page-1" target="_blank">${result.totalItems} results</a></b></div>`;
         });
     });
+
+    return goodreadsResults
+  };
+
+  /**
+   * Add the buttons
+   * Might outrun the rest of the dom,
+   * so keep retrying until the container is ready
+   */
+  const addLibbyButton = () => {
+    let container = document.getElementsByClassName("menu-library-buttons");
+    if (container && container[0]) {
+      container[0].parentNode.insertBefore(
+        createLibbyButton(),
+        container[0].nextSibling
+      );
+    } else {
+      setTimeout(addLibbyButton, 10);
+    }
+  };
+
+  const addGoodreadsResults = async () => {
+    let container = document.getElementsByClassName("BookDetails");
+    if (container && container[0]) {
+      createGoodreadsResults().then(goodreadsResults => {
+          let test = container[0].parentNode.insertBefore(
+              goodreadsResults,
+              container[0].nextSibling
+          );
+      })
+    } else {
+      setTimeout(addGoodreadsResults, 10);
+    }
   };
 
   if (unsafeWindow.location.host == "libbyapp.com") {
@@ -98,3 +120,4 @@
     addGoodreadsResults();
   }
 })();
+}, false);
