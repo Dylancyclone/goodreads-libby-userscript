@@ -1,0 +1,6 @@
+9/30/2022 1.1.0:
++ Updated to support the new Goodreads UI
++ Split eBook and Audiobook results
+
+3/4/2022 1.0.0:
++ Initial Release
