@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name					Goodreads Libby Results
 // @namespace			https://github.com/Dylancyclone/goodreads-libby-userscript
-// @version				1.1.0
+// @version				1.2.0
 // @description		Searches for the book you are looking at on Goodreads across all your libby libraries
 // @author				Dylancyclone
 // @match					https://libbyapp.com/interview/menu
