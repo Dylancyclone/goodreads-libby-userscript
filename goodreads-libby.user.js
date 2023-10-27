@@ -43,40 +43,15 @@ window.addEventListener(
 				return libbySyncButton
 			}
 
-			const createGoodreadsResults = async () => {
-				let builderDiv = document.createElement("div")
-
-				let bookTitle = document
-					.querySelector("[data-testid='bookTitle']")
-					.innerHTML.trim()
-				let bookAuthor = document
-					.querySelector("[data-testid='name']")
-					.innerHTML.trim()
-				let searchString = encodeURIComponent(`${bookTitle} ${bookAuthor}`)
-				let libraries = JSON.parse(await GM.getValue("libraries", "[]"))
-				builderDiv.innerHTML = `
-					<div style="
-						background-color: #ececec;
-						border: 1px solid black;
-						margin-top: 25px;
-						padding: 1em;"
-					>
-						<h3>Libby results</h3>
-						<table id="libby-results">
-							<tr>
-								<th style="margin-right: 20px;">Library</th>
-								<th>Results</th>
-							</tr>
-						</div>
-					</div>
-				`.trim()
-
-				let goodreadsResults = builderDiv.firstChild
-
+			const renderSearchResults = async (
+				libraries,
+				searchString,
+				targetDiv,
+				openInOverdrive
+			) => {
+				targetDiv.innerHTML = ""
 				if (libraries.length === 0) {
-					document.getElementById(
-						"libby-results"
-					).innerHTML = `No libraries found, please visit <a href="https://libbyapp.com/interview/menu" target="_blank">here</a> to sync your libraries.`
+					targetDiv.innerHTML = `No libraries found, please visit <a href="https://libbyapp.com/interview/menu" target="_blank">here</a> to sync your libraries.`
 				}
 
 				libraries.map((library) => {
@@ -91,20 +66,86 @@ window.addEventListener(
 							let audiobookCount = result.items.filter(
 								(item) => item.type.id === "audiobook"
 							).length
-							document.getElementById("libby-results").innerHTML += `
+							let link = openInOverdrive
+								? `https://${library.baseKey}.overdrive.com/search?query=${searchString}`
+								: `https://libbyapp.com/search/${library.baseKey}/search/query-${searchString}/page-1`
+							targetDiv.innerHTML += `
 								<tr>
 									<td style="padding-right: 20px;">${library._.name}</td>
-									<td><a 
-										href="https://libbyapp.com/search/${
-											library.baseKey
-										}/search/query-${searchString}/page-1"
-										target="_blank">
-									${ebookCount || "-"} 📕 / ${audiobookCount || "-"} 🎧</a></td>
+									<td>
+										<a href="${link}" target="_blank">
+											${ebookCount || "-"} 📕 / ${audiobookCount || "-"} 🎧
+										</a>
+									</td>
 								</tr>`
 						})
 				})
+			}
 
-				return goodreadsResults
+			const createGoodreadsResults = async () => {
+				let builderDiv = document.createElement("div")
+
+				let bookTitle = document
+					.querySelector("[data-testid='bookTitle']")
+					.innerHTML.trim()
+				let bookAuthor = document
+					.querySelector("[data-testid='name']")
+					.innerHTML.trim()
+				let searchString = encodeURIComponent(`${bookTitle} ${bookAuthor}`)
+				let libraries = JSON.parse(await GM.getValue("libraries", "[]"))
+				let openInOverdrive = JSON.parse(
+					await GM.getValue("openInOverdrive", "false")
+				)
+				builderDiv.innerHTML = `
+					<div style="
+						background-color: #ececec;
+						border: 1px solid black;
+						margin-top: 25px;
+						padding: 1em;"
+					>
+						<h3>Libby results</h3>
+						<table id="libby-results">
+							<tr>
+								<th style="margin-right: 20px;">Library</th>
+								<th>Results</th>
+							</tr>
+						</table>
+						<div style="margin-top: 10px;">
+							<p> Open links in: </p>
+							<input type="radio" id="openInLibbyButton" name="openLinksIn" value="libby" ${
+								!openInOverdrive ? "checked" : ""
+							}>
+							<label for="libby">Libby</label>
+							<input type="radio" id="openInOverdriveButton" name="openLinksIn" value="overdrive" ${
+								openInOverdrive ? "checked" : ""
+							}>
+							<label for="overdrive">Overdrive</label>
+						</div>
+					</div>
+				`.trim()
+
+				let libbyResults = builderDiv.querySelector("#libby-results")
+				let openInLibbyButton = builderDiv.querySelector("#openInLibbyButton")
+				openInLibbyButton.onclick = () => {
+					GM.setValue("openInOverdrive", "false")
+					renderSearchResults(libraries, searchString, libbyResults, false)
+				}
+				let openInOverdriveButton = builderDiv.querySelector(
+					"#openInOverdriveButton"
+				)
+				openInOverdriveButton.onclick = () => {
+					GM.setValue("openInOverdrive", "true")
+					renderSearchResults(libraries, searchString, libbyResults, true)
+				}
+
+				renderSearchResults(
+					libraries,
+					searchString,
+					libbyResults,
+					openInOverdrive
+				)
+
+				return builderDiv.firstChild
 			}
 
 			/**
