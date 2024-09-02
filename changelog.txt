@@ -1,3 +1,6 @@
+9/01/2024 1.2.1:
+* Support new Libby design
+
 10/26/2023 1.2.0:
 + Add support for opening search links in Overdrive
 
