@@ -32,8 +32,8 @@ window.addEventListener(
 			const createLibbyButton = () => {
 				let builderDiv = document.createElement("div")
 				builderDiv.innerHTML = `
-					<div class="menu-library-buttons">
-						<button class="menu-library-buttons-add-library halo" role="button" type="button">
+					<div class="summary-list-action">
+						<button class="summary-list-action-add-library halo" role="button" type="button">
 								<span role="text">Save Libraries (userscript)</span>
 						</button>
 					</div>
@@ -154,7 +154,7 @@ window.addEventListener(
 			 * so keep retrying until the container is ready
 			 */
 			const addLibbyButton = () => {
-				let container = document.getElementsByClassName("menu-library-buttons")
+				let container = document.getElementsByClassName("summary-list-section-actions")
 				if (container && container[0]) {
 					container[0].parentNode.insertBefore(
 						createLibbyButton(),
